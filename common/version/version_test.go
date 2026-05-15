@@ -84,3 +84,15 @@ func TestVersionInfoString(t *testing.T) {
 		t.Errorf("String() should contain patch version, got %s", str)
 	}
 }
+
+// TestVersionIsNotEmpty is a quick sanity check to ensure the version string
+// is non-empty and follows the expected semver-like format (X.Y.Z).
+func TestVersionIsNotEmpty(t *testing.T) {
+	if version.Version == "" {
+		t.Error("Version string should not be empty")
+	}
+	parts := strings.Split(version.Version, ".")
+	if len(parts) != 3 {
+		t.Errorf("Version string should have 3 parts (major.minor.patch), got %q", version.Version)
+	}
+}
