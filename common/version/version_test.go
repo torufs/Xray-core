@@ -60,6 +60,7 @@ func TestGetVersionInfo(t *testing.T) {
 	if info.Arch != runtime.GOARCH {
 		t.Errorf("Arch mismatch: expected %s, got %s", runtime.GOARCH, info.Arch)
 	}
+	// GoVersion is populated via runtime.Version() which always starts with "go"
 	if !strings.HasPrefix(info.GoVersion, "go") {
 		t.Errorf("GoVersion should start with 'go', got %s", info.GoVersion)
 	}
@@ -73,5 +74,9 @@ func TestVersionInfoString(t *testing.T) {
 	}
 	if !strings.Contains(str, fmt.Sprintf("%d", version.Major)) {
 		t.Errorf("String() should contain major version, got %s", str)
+	}
+	// Also verify the minor version is present in the string representation
+	if !strings.Contains(str, fmt.Sprintf("%d", version.Minor)) {
+		t.Errorf("String() should contain minor version, got %s", str)
 	}
 }
