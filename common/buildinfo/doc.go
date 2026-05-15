@@ -11,4 +11,7 @@
 // When not set via ldflags, each field defaults to the string "unknown".
 // Runtime fields (GoVersion, OS, Arch) are always populated from the
 // standard library at startup.
+//
+// Note: for local builds, you can use the Makefile target `make build` which
+// automatically injects these ldflags. See the project README for details.
 package buildinfo
