@@ -79,4 +79,8 @@ func TestVersionInfoString(t *testing.T) {
 	if !strings.Contains(str, fmt.Sprintf("%d", version.Minor)) {
 		t.Errorf("String() should contain minor version, got %s", str)
 	}
+	// Patch version should also appear in the string representation
+	if !strings.Contains(str, fmt.Sprintf("%d", version.Patch)) {
+		t.Errorf("String() should contain patch version, got %s", str)
+	}
 }
