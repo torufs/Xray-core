@@ -7,9 +7,9 @@ import (
 
 // Build metadata variables, set via ldflags during compilation.
 var (
-	BuildDate   = "unknown"
-	CommitHash  = "unknown"
-	Branch      = "unknown"
+	BuildDate  = "unknown"
+	CommitHash = "unknown"
+	Branch     = "unknown"
 )
 
 // BuildInfo holds compiled-in metadata about the current build.
@@ -49,7 +49,13 @@ func (b BuildInfo) String() string {
 }
 
 // ShortString returns a compact single-line summary.
+// Format: branch@shortHash (os/arch, goVersion)
+// Note: truncate commit hash to 7 chars for brevity, matching git short-hash convention.
 func (b BuildInfo) ShortString() string {
+	hash := b.CommitHash
+	if len(hash) > 7 && hash != "unknown" {
+		hash = hash[:7]
+	}
 	return fmt.Sprintf("%s@%s (%s/%s, %s)",
-		b.Branch, b.CommitHash, b.OS, b.Arch, b.GoVersion)
+		b.Branch, hash, b.OS, b.Arch, b.GoVersion)
 }
