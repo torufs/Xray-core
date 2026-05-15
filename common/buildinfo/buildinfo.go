@@ -22,7 +22,8 @@ var (
 	BuildBranch = "unknown"
 
 	// BuildBy identifies the CI system or user that produced the build.
-	BuildBy = "unknown"
+	// Defaulting to "personal" to distinguish local builds from official releases.
+	BuildBy = "personal"
 )
 
 // BuildInfo holds structured information about how and when the binary was built.
