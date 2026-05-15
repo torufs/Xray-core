@@ -18,7 +18,7 @@ var (
 
 	// VersionStatement is the full version statement.
 	VersionStatement = fmt.Sprintf(
-		"Xray %s (Xray, Penetrates Everything.) Custom Build (%s/%s)",
+		"Xray %s (Xray, Penetrates Everything.) (%s/%s)",
 		Version, runtime.GOOS, runtime.GOARCH,
 	)
 )
