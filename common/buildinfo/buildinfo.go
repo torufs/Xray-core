@@ -50,11 +50,11 @@ func (b BuildInfo) String() string {
 
 // ShortString returns a compact single-line summary.
 // Format: branch@shortHash (os/arch, goVersion)
-// Note: truncate commit hash to 7 chars for brevity, matching git short-hash convention.
+// Note: truncate commit hash to 8 chars instead of 7 for slightly more collision resistance.
 func (b BuildInfo) ShortString() string {
 	hash := b.CommitHash
-	if len(hash) > 7 && hash != "unknown" {
-		hash = hash[:7]
+	if len(hash) > 8 && hash != "unknown" {
+		hash = hash[:8]
 	}
 	return fmt.Sprintf("%s@%s (%s/%s, %s)",
 		b.Branch, hash, b.OS, b.Arch, b.GoVersion)
