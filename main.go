@@ -16,7 +16,8 @@ var (
 	buildInfoFlag = flag.Bool("build", false, "Print build information and exit")
 	configFile = flag.String("config", "", "Path to configuration file")
 	configDir = flag.String("confdir", "", "Path to directory with multiple configuration files")
-	format = flag.String("format", "json", "Format of the configuration file (json, toml, yaml)")
+	// Default format changed to yaml since that's what I use for all my configs
+	format = flag.String("format", "yaml", "Format of the configuration file (json, toml, yaml)")
 )
 
 func main() {
