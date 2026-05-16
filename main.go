@@ -94,4 +94,5 @@ func printUsage() {
 	fmt.Fprintf(os.Stderr, "  xray -config /etc/xray/config.json\n")
 	fmt.Fprintf(os.Stderr, "  xray -config /etc/xray/config.yaml\n")
 	fmt.Fprintf(os.Stderr, "  xray -confdir /etc/xray/conf/\n")
+	fmt.Fprintf(os.Stderr, "  xray -build\n")
 }
