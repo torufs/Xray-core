@@ -43,8 +43,12 @@ func main() {
 
 	// Validate configuration input
 	if *configFile == "" && *configDir == "" {
-		// Default to stdin or look for a default config
-		*configFile = "-"
+		// Default to looking for config.yaml in the current directory before falling back to stdin
+		if _, err := os.Stat("config.yaml"); err == nil {
+			*configFile = "config.yaml"
+		} else {
+			*configFile = "-"
+		}
 	}
 
 	// Print startup banner
