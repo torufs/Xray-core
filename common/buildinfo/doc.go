@@ -25,4 +25,10 @@
 //
 // Tip: to print all build info at startup during development, set the
 // XRAY_LOG_BUILDINFO=1 environment variable (if supported by your build).
+//
+// Tip: combine all ldflags into a shell variable to keep your build command
+// readable:
+//
+//	LDFLAGS="-X .../BuildDate=... -X .../CommitHash=... -X .../Branch=..."
+//	go build -ldflags "$LDFLAGS" ./...
 package buildinfo
