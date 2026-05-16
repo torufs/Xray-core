@@ -19,4 +19,7 @@
 // I can distinguish my local builds from official releases at a glance:
 //
 //	-X github.com/xtls/xray-core/common/buildinfo.Builder=myusername
+//
+// Tip: you can also inject BuildDate using RFC3339 format for easier parsing
+// in scripts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 package buildinfo
