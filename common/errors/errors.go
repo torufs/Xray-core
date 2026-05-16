@@ -1,227 +1,124 @@
-// Package errors is a drop-in replacement for Golang lib 'errors'.
-package errors // import "github.com/xtls/xray-core/common/errors"
+// Package errors provides error handling utilities for Xray-core.
+// It wraps standard errors with additional context such as severity levels
+// and call path information for better debugging and logging.
+package errors
 
 import (
-	"context"
-	"runtime"
+	"errors"
+	"fmt"
 	"strings"
-
-	c "github.com/xtls/xray-core/common/ctx"
-	"github.com/xtls/xray-core/common/log"
-	"github.com/xtls/xray-core/common/serial"
 )
 
-const trim = len("github.com/xtls/xray-core/")
+// Severity represents the severity level of an error.
+type Severity byte
 
-type hasInnerError interface {
-	// Unwrap returns the underlying error of this one.
-	Unwrap() error
-}
+const (
+	// SeverityDebug indicates a debug-level error (informational).
+	SeverityDebug Severity = iota
+	// SeverityInfo indicates an informational error.
+	SeverityInfo
+	// SeverityWarning indicates a warning-level error.
+	SeverityWarning
+	// SeverityError indicates a standard error.
+	SeverityError
+)
 
-type hasSeverity interface {
-	Severity() log.Severity
-}
-
-// Error is an error object with underlying error.
+// Error is an error type with additional context for Xray-core.
 type Error struct {
-	prefix   []interface{}
+	pathObj  interface{}
 	message  []interface{}
-	caller   string
 	inner    error
-	severity log.Severity
+	severity Severity
 }
 
-// Error implements error.Error().
-func (err *Error) Error() string {
+// Error implements the error interface.
+func (e *Error) Error() string {
 	builder := strings.Builder{}
-	for _, prefix := range err.prefix {
-		builder.WriteByte('[')
-		builder.WriteString(serial.ToString(prefix))
-		builder.WriteString("] ")
-	}
-
-	if len(err.caller) > 0 {
-		builder.WriteString(err.caller)
+	if e.pathObj != nil {
+		builder.WriteString(fmt.Sprintf("%T", e.pathObj))
 		builder.WriteString(": ")
 	}
-
-	msg := serial.Concat(err.message...)
-	builder.WriteString(msg)
-
-	if err.inner != nil {
-		builder.WriteString(" > ")
-		builder.WriteString(err.inner.Error())
+	msgParts := make([]string, 0, len(e.message))
+	for _, msg := range e.message {
+		msgParts = append(msgParts, fmt.Sprintf("%v", msg))
 	}
-
+	builder.WriteString(strings.Join(msgParts, " "))
+	if e.inner != nil {
+		builder.WriteString(" | caused by: ")
+		builder.WriteString(e.inner.Error())
+	}
 	return builder.String()
 }
 
-// Unwrap implements hasInnerError.Unwrap()
-func (err *Error) Unwrap() error {
-	if err.inner == nil {
-		return nil
-	}
-	return err.inner
+// Unwrap returns the inner error, implementing the errors.Unwrap interface.
+func (e *Error) Unwrap() error {
+	return e.inner
 }
 
-func (err *Error) Base(e error) *Error {
-	err.inner = e
-	return err
+// Severity returns the severity level of this error.
+func (e *Error) GetSeverity() Severity {
+	return e.severity
 }
 
-func (err *Error) atSeverity(s log.Severity) *Error {
-	err.severity = s
-	return err
+// WithSeverity sets the severity level of the error and returns it.
+func (e *Error) WithSeverity(s Severity) *Error {
+	e.severity = s
+	return e
 }
 
-func (err *Error) Severity() log.Severity {
-	if err.inner == nil {
-		return err.severity
-	}
-
-	if s, ok := err.inner.(hasSeverity); ok {
-		as := s.Severity()
-		if as < err.severity {
-			return as
-		}
-	}
-
-	return err.severity
+// AtDebug sets the error severity to debug.
+func (e *Error) AtDebug() *Error {
+	return e.WithSeverity(SeverityDebug)
 }
 
-// AtDebug sets the severity to debug.
-func (err *Error) AtDebug() *Error {
-	return err.atSeverity(log.Severity_Debug)
+// AtInfo sets the error severity to info.
+func (e *Error) AtInfo() *Error {
+	return e.WithSeverity(SeverityInfo)
 }
 
-// AtInfo sets the severity to info.
-func (err *Error) AtInfo() *Error {
-	return err.atSeverity(log.Severity_Info)
+// AtWarning sets the error severity to warning.
+func (e *Error) AtWarning() *Error {
+	return e.WithSeverity(SeverityWarning)
 }
 
-// AtWarning sets the severity to warning.
-func (err *Error) AtWarning() *Error {
-	return err.atSeverity(log.Severity_Warning)
+// AtError sets the error severity to error (default).
+func (e *Error) AtError() *Error {
+	return e.WithSeverity(SeverityError)
 }
 
-// AtError sets the severity to error.
-func (err *Error) AtError() *Error {
-	return err.atSeverity(log.Severity_Error)
-}
-
-// String returns the string representation of this error.
-func (err *Error) String() string {
-	return err.Error()
-}
-
-type ExportOptionHolder struct {
-	SessionID uint32
-}
-
-type ExportOption func(*ExportOptionHolder)
-
-// New returns a new error object with message formed from given arguments.
+// New creates a new Error with the given message parts.
 func New(msg ...interface{}) *Error {
-	pc, _, _, _ := runtime.Caller(1)
-	details := runtime.FuncForPC(pc).Name()
-	if len(details) >= trim {
-		details = details[trim:]
-	}
-	i := strings.Index(details, ".")
-	if i > 0 {
-		details = details[:i]
-	}
 	return &Error{
 		message:  msg,
-		severity: log.Severity_Info,
-		caller:   details,
+		severity: SeverityError,
 	}
 }
 
-func LogDebug(ctx context.Context, msg ...interface{}) {
-	doLog(ctx, nil, log.Severity_Debug, msg...)
-}
-
-func LogDebugInner(ctx context.Context, inner error, msg ...interface{}) {
-	doLog(ctx, inner, log.Severity_Debug, msg...)
-}
-
-func LogInfo(ctx context.Context, msg ...interface{}) {
-	doLog(ctx, nil, log.Severity_Info, msg...)
-}
-
-func LogInfoInner(ctx context.Context, inner error, msg ...interface{}) {
-	doLog(ctx, inner, log.Severity_Info, msg...)
-}
-
-func LogWarning(ctx context.Context, msg ...interface{}) {
-	doLog(ctx, nil, log.Severity_Warning, msg...)
-}
-
-func LogWarningInner(ctx context.Context, inner error, msg ...interface{}) {
-	doLog(ctx, inner, log.Severity_Warning, msg...)
-}
-
-func LogError(ctx context.Context, msg ...interface{}) {
-	doLog(ctx, nil, log.Severity_Error, msg...)
-}
-
-func LogErrorInner(ctx context.Context, inner error, msg ...interface{}) {
-	doLog(ctx, inner, log.Severity_Error, msg...)
-}
-
-func doLog(ctx context.Context, inner error, severity log.Severity, msg ...interface{}) {
-	pc, _, _, _ := runtime.Caller(2)
-	details := runtime.FuncForPC(pc).Name()
-	if len(details) >= trim {
-		details = details[trim:]
-	}
-	i := strings.Index(details, ".")
-	if i > 0 {
-		details = details[:i]
-	}
-	err := &Error{
+// Cause wraps an existing error with additional context message parts.
+func Cause(inner error, msg ...interface{}) *Error {
+	return &Error{
 		message:  msg,
-		severity: severity,
-		caller:   details,
 		inner:    inner,
+		severity: SeverityError,
 	}
-	if ctx != nil && ctx != context.Background() {
-		id := uint32(c.IDFromContext(ctx))
-		if id > 0 {
-			err.prefix = append(err.prefix, id)
-		}
-	}
-	log.Record(&log.GeneralMessage{
-		Severity: GetSeverity(err),
-		Content:  err,
-	})
 }
 
-// Cause returns the root cause of this error.
-func Cause(err error) error {
-	if err == nil {
-		return nil
-	}
-L:
-	for {
-		switch inner := err.(type) {
-		case hasInnerError:
-			if inner.Unwrap() == nil {
-				break L
-			}
-			err = inner.Unwrap()
-		default:
-			break L
-		}
-	}
-	return err
+// Is reports whether any error in the chain matches the target.
+func Is(err, target error) bool {
+	return errors.Is(err, target)
 }
 
-// GetSeverity returns the actual severity of the error, including inner errors.
-func GetSeverity(err error) log.Severity {
-	if s, ok := err.(hasSeverity); ok {
-		return s.Severity()
+// As finds the first error in the chain that matches target.
+func As(err error, target interface{}) bool {
+	return errors.As(err, target)
+}
+
+// GetSeverityFromError returns the severity of an error if it is an *Error,
+// otherwise returns SeverityError as the default.
+func GetSeverityFromError(err error) Severity {
+	var e *Error
+	if errors.As(err, &e) {
+		return e.GetSeverity()
 	}
-	return log.Severity_Info
+	return SeverityError
 }
