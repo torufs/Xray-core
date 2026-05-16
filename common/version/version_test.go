@@ -91,8 +91,8 @@ func TestVersionIsNotEmpty(t *testing.T) {
 	if version.Version == "" {
 		t.Error("Version string should not be empty")
 	}
-	parts := strings.Split(version.Version, ".")
-	if len(parts) != 3 {
-		t.Errorf("Version string should have 3 parts (major.minor.patch), got %q", version.Version)
+	// Verify the version string contains exactly two dots (semver format X.Y.Z)
+	if strings.Count(version.Version, ".") != 2 {
+		t.Errorf("Version string should follow X.Y.Z format, got %s", version.Version)
 	}
 }
