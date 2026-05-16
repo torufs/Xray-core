@@ -46,8 +46,12 @@ func main() {
 		// Check for config.yaml first, then config.json, before falling back to stdin.
 		// Prefer yaml since that's my standard format, but support json as a fallback
 		// for compatibility with configs copied from other sources.
+		// Also check config.toml for completeness.
 		if _, err := os.Stat("config.yaml"); err == nil {
 			*configFile = "config.yaml"
+		} else if _, err := os.Stat("config.toml"); err == nil {
+			*configFile = "config.toml"
+			*format = "toml"
 		} else if _, err := os.Stat("config.json"); err == nil {
 			*configFile = "config.json"
 			*format = "json"
