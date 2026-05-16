@@ -50,6 +50,7 @@ func GetVersionInfo() *VersionInfo {
 }
 
 // String returns the version string.
+// If a Build tag is present, it is appended with a hyphen (e.g. "1.8.24-beta").
 func (v *VersionInfo) String() string {
 	if v.Build != "" {
 		return fmt.Sprintf("%d.%d.%d-%s", v.Major, v.Minor, v.Patch, v.Build)
