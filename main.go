@@ -43,9 +43,14 @@ func main() {
 
 	// Validate configuration input
 	if *configFile == "" && *configDir == "" {
-		// Default to looking for config.yaml in the current directory before falling back to stdin
+		// Check for config.yaml first, then config.json, before falling back to stdin.
+		// Prefer yaml since that's my standard format, but support json as a fallback
+		// for compatibility with configs copied from other sources.
 		if _, err := os.Stat("config.yaml"); err == nil {
 			*configFile = "config.yaml"
+		} else if _, err := os.Stat("config.json"); err == nil {
+			*configFile = "config.json"
+			*format = "json"
 		} else {
 			*configFile = "-"
 		}
