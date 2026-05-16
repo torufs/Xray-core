@@ -59,7 +59,9 @@ func TestBuildInfoShortString(t *testing.T) {
 }
 
 func TestBuildInfoUnknownDefaults(t *testing.T) {
-	// Without ldflags, these should default to "unknown"
+	// Without ldflags, these should default to "unknown".
+	// In CI builds these values are typically injected via ldflags, so we
+	// only log a notice rather than failing the test when they differ.
 	info := buildinfo.GetBuildInfo()
 	if info.BuildDate != "unknown" {
 		t.Logf("BuildDate is %q (may be set by ldflags)", info.BuildDate)
