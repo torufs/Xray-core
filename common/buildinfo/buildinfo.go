@@ -1,6 +1,5 @@
-// Package buildinfo provides build-time information about the Xray binary.
-// This includes version details, build timestamps, and environment metadata
-// that are injected at compile time via ldflags.
+// Package buildinfo provides build-time information for Xray-core.
+// This information is typically injected at build time via ldflags.
 package buildinfo
 
 import (
@@ -9,80 +8,68 @@ import (
 	"strings"
 )
 
-// Build-time variables injected via -ldflags.
-// Example: go build -ldflags "-X common/buildinfo.BuildTime=2024-01-01T00:00:00Z"
+// Build-time variables injected via ldflags:
+//
+//	-X common/buildinfo.buildVersion=v1.0.0
+//	-X common/buildinfo.buildCommit=abc1234
+//	-X common/buildinfo.buildDate=2024-01-01
 var (
-	// BuildTime is the UTC timestamp when the binary was built.
-	BuildTime = "unknown"
-
-	// BuildCommit is the full Git commit hash at build time.
-	BuildCommit = "unknown"
-
-	// BuildBranch is the Git branch name at build time.
-	BuildBranch = "unknown"
-
-	// BuildBy identifies the CI system or user that produced the build.
-	// Defaulting to "personal" to distinguish local builds from official releases.
-	BuildBy = "personal"
+	buildVersion = "unknown"
+	buildCommit  = "unknown"
+	buildDate    = "unknown"
 )
 
-// BuildInfo holds structured information about how and when the binary was built.
+// BuildInfo holds metadata about the current build.
 type BuildInfo struct {
-	// Time is the build timestamp (UTC).
-	Time string
-
-	// Commit is the Git commit hash.
+	// Version is the semantic version string (e.g. "v1.8.0").
+	Version string
+	// Commit is the short Git commit hash at build time.
 	Commit string
-
-	// Branch is the Git branch.
-	Branch string
-
-	// By identifies the builder (CI system, developer, etc.).
-	By string
-
-	// GoVersion is the version of Go used to compile the binary.
+	// Date is the ISO-8601 build date string.
+	Date string
+	// GoVersion is the Go toolchain version used to compile the binary.
 	GoVersion string
-
-	// OS is the target operating system.
+	// OS is the target operating system (GOOS).
 	OS string
-
-	// Arch is the target CPU architecture.
+	// Arch is the target CPU architecture (GOARCH).
 	Arch string
 }
 
-// GetBuildInfo returns a BuildInfo struct populated with compile-time
-// and runtime metadata. Values not set at build time default to "unknown".
-func GetBuildInfo() *BuildInfo {
-	return &BuildInfo{
-		Time:      BuildTime,
-		Commit:    BuildCommit,
-		Branch:    BuildBranch,
-		By:        BuildBy,
+// GetBuildInfo returns a BuildInfo struct populated with the current
+// binary's build metadata. Values that were not set at compile time
+// default to "unknown".
+func GetBuildInfo() BuildInfo {
+	return BuildInfo{
+		Version:   buildVersion,
+		Commit:    buildCommit,
+		Date:      buildDate,
 		GoVersion: runtime.Version(),
 		OS:        runtime.GOOS,
 		Arch:      runtime.GOARCH,
 	}
 }
 
-// String returns a human-readable multi-line representation of BuildInfo.
-func (b *BuildInfo) String() string {
+// String returns a human-readable multi-line representation of the
+// build information, suitable for --version output.
+func (b BuildInfo) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Build Time:   %s\n", b.Time))
-	sb.WriteString(fmt.Sprintf("Git Commit:   %s\n", b.Commit))
-	sb.WriteString(fmt.Sprintf("Git Branch:   %s\n", b.Branch))
-	sb.WriteString(fmt.Sprintf("Built By:     %s\n", b.By))
-	sb.WriteString(fmt.Sprintf("Go Version:   %s\n", b.GoVersion))
-	sb.WriteString(fmt.Sprintf("OS/Arch:      %s/%s", b.OS, b.Arch))
+	sb.WriteString(fmt.Sprintf("Version : %s\n", b.Version))
+	sb.WriteString(fmt.Sprintf("Commit  : %s\n", b.Commit))
+	sb.WriteString(fmt.Sprintf("Date    : %s\n", b.Date))
+	sb.WriteString(fmt.Sprintf("Go      : %s\n", b.GoVersion))
+	sb.WriteString(fmt.Sprintf("OS/Arch : %s/%s", b.OS, b.Arch))
 	return sb.String()
 }
 
-// ShortString returns a compact single-line summary of the most important
-// build metadata, suitable for log output or --version flags.
-func (b *BuildInfo) ShortString() string {
-	commit := b.Commit
-	if len(commit) > 8 {
-		commit = commit[:8]
-	}
-	return fmt.Sprintf("%s/%s %s commit/%s built-by/%s",
-		b.OS, b.Arch, b.GoVersion, commit, b.By)
+// ShortString returns a compact single-line summary of the build,
+// e.g. "v1.8.0 (abc1234, 2024-01-01) go1.22.0 linux/amd64".
+func (b BuildInfo) ShortString() string {
+	return fmt.Sprintf("%s (%s, %s) %s %s/%s",
+		b.Version,
+		b.Commit,
+		b.Date,
+		b.GoVersion,
+		b.OS,
+		b.Arch,
+	)
 }
