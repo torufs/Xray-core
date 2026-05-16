@@ -70,6 +70,8 @@ func (b BuildInfo) String() string {
 	sb.WriteString(fmt.Sprintf("Build     : %s\n", b.Build))
 	sb.WriteString(fmt.Sprintf("BuildTime : %s\n", b.BuildTime))
 	sb.WriteString(fmt.Sprintf("Go        : %s\n", b.GoVersion))
+	// Include number of logical CPUs available at runtime for diagnostics.
+	sb.WriteString(fmt.Sprintf("CPUs      : %d\n", runtime.NumCPU()))
 	sb.WriteString(fmt.Sprintf("OS/Arch   : %s/%s", b.OS, b.Arch))
 	return sb.String()
 }
