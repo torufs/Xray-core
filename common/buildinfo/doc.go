@@ -14,4 +14,9 @@
 //
 // Note: for local builds, you can use the Makefile target `make build` which
 // automatically injects these ldflags. See the project README for details.
+//
+// Personal note: I also find it useful to inject a custom "Builder" tag so
+// I can distinguish my local builds from official releases at a glance:
+//
+//	-X github.com/xtls/xray-core/common/buildinfo.Builder=myusername
 package buildinfo
