@@ -91,7 +91,7 @@ func TestVersionIsNotEmpty(t *testing.T) {
 	if version.Version == "" {
 		t.Error("Version string should not be empty")
 	}
-	// Verify the version string contains exactly two dots (semver format X.Y.Z)
+	// Ensure the version string contains exactly two dots (X.Y.Z format)
 	if strings.Count(version.Version, ".") != 2 {
 		t.Errorf("Version string should follow X.Y.Z format, got %s", version.Version)
 	}
