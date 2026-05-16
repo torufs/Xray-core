@@ -22,4 +22,7 @@
 //
 // Tip: you can also inject BuildDate using RFC3339 format for easier parsing
 // in scripts: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+//
+// Tip: to print all build info at startup during development, set the
+// XRAY_LOG_BUILDINFO=1 environment variable (if supported by your build).
 package buildinfo
