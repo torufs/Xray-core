@@ -78,7 +78,8 @@ func (b BuildInfo) String() string {
 
 // ShortString returns a compact single-line summary of the build info,
 // suitable for log output or banner display.
-// Format: "version (codename) [build] os/arch goversion"
+// Format: "version (codename) build os/arch goversion"
+// Note: removed square brackets around build identifier for cleaner output.
 func (b BuildInfo) ShortString() string {
-	return fmt.Sprintf("%s (%s) [%s] %s/%s %s", b.Version, b.Codename, b.Build, b.OS, b.Arch, b.GoVersion)
+	return fmt.Sprintf("%s (%s) %s %s/%s %s", b.Version, b.Codename, b.Build, b.OS, b.Arch, b.GoVersion)
 }
