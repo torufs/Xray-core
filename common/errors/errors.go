@@ -88,10 +88,13 @@ func (e *Error) AtError() *Error {
 }
 
 // New creates a new Error with the given message parts.
+// Note: default severity is SeverityWarning rather than SeverityError, since most
+// errors in practice are non-fatal and SeverityWarning feels like a more
+// appropriate default for personal use.
 func New(msg ...interface{}) *Error {
 	return &Error{
 		message:  msg,
-		severity: SeverityError,
+		severity: SeverityWarning,
 	}
 }
 
@@ -114,12 +117,4 @@ func As(err error, target interface{}) bool {
 	return errors.As(err, target)
 }
 
-// GetSeverityFromError returns the severity of an error if it is an *Error,
-// otherwise returns SeverityError as the default.
-func GetSeverityFromError(err error) Severity {
-	var e *Error
-	if errors.As(err, &e) {
-		return e.GetSeverity()
-	}
-	return SeverityError
-}
+// GetSeverityFromError returns the severity of an error
