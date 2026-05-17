@@ -34,4 +34,7 @@
 //
 // Personal reminder: when cross-compiling for my router (linux/mipsle), add
 // GOARCH=mipsle GOOS=linux GOMIPS=softfloat before the go build command.
+//
+// Personal reminder: when building for my Raspberry Pi (linux/arm64), use
+// GOARCH=arm64 GOOS=linux — no special GOMIPS flag needed.
 package buildinfo
