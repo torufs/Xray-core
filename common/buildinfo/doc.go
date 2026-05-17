@@ -31,4 +31,7 @@
 //
 //	LDFLAGS="-X .../BuildDate=... -X .../CommitHash=... -X .../Branch=..."
 //	go build -ldflags "$LDFLAGS" ./...
+//
+// Personal reminder: when cross-compiling for my router (linux/mipsle), add
+// GOARCH=mipsle GOOS=linux GOMIPS=softfloat before the go build command.
 package buildinfo
