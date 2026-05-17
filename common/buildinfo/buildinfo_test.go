@@ -64,7 +64,12 @@ func TestBuildInfoUnknownDefaults(t *testing.T) {
 	// only log a notice rather than failing the test when they differ.
 	// Note: when running locally without build tags, all three fields below
 	// should print "unknown" — useful to verify a clean dev environment.
+	//
+	// Personal note: I added t.Log output here so that running `go test -v`
+	// always shows the actual values, making it easier to spot accidental
+	// ldflags leaking in from wrapper scripts.
 	info := buildinfo.GetBuildInfo()
+	t.Logf("BuildDate=%q CommitHash=%q Branch=%q", info.BuildDate, info.CommitHash, info.Branch)
 	if info.BuildDate != "unknown" {
 		t.Logf("BuildDate is %q (may be set by ldflags)", info.BuildDate)
 	}
