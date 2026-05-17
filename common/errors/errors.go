@@ -44,7 +44,8 @@ func (e *Error) Error() string {
 	}
 	builder.WriteString(strings.Join(msgParts, " "))
 	if e.inner != nil {
-		builder.WriteString(" | caused by: ")
+		// Use a cleaner separator for wrapped errors to improve readability in logs.
+		builder.WriteString(" > ")
 		builder.WriteString(e.inner.Error())
 	}
 	return builder.String()
